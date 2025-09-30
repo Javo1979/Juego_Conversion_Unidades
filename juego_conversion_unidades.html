@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajuste de Unidades Galáctico</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Orbitron:wght@700&display=swap');
+
+        :root {
+            --primary-color: #0c0f1a;
+            --secondary-color: #1a2238;
+            --accent-color: #9daaf2;
+            --highlight-color: #f4d35e;
+            --text-color: #f0f8ff;
+            --success-color: #50fa7b;
+            --error-color: #ff5555;
+        }
+
+        body {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            font-family: 'Roboto Mono', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+        }
+
+        .game-container {
+            background-color: var(--secondary-color);
+            border: 2px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 700px;
+            box-shadow: 0 0 25px rgba(157, 170, 242, 0.3);
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--highlight-color);
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 15px var(--highlight-color);
+        }
+        
+        #info-display {
+            display: flex;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--accent-color);
+            background-color: var(--primary-color);
+            border-radius: 4px;
+        }
+        
+        #mision-nombre {
+            color: var(--text-color);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            height: 30px;
+        }
+
+        #problema {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--primary-color);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        
+        .input-group {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            background-color: var(--primary-color);
+            border: 2px solid var(--accent-color);
+            color: var(--text-color);
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.2rem;
+            text-align: center;
+            border-radius: 4px;
+            width: 150px;
+            padding: 8px;
+            transition: all 0.2s ease-in-out;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--highlight-color);
+            box-shadow: 0 0 8px var(--highlight-color);
+        }
+
+        button {
+            background-color: var(--highlight-color);
+            color: var(--primary-color);
+            border: none;
+            border-radius: 5px;
+            padding: 12px 24px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+            margin: 0.5rem;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            background-color: #ffeb82;
+        }
+
+        #siguiente-btn {
+            display: none;
+            background-color: var(--success-color);
+        }
+        #reiniciar-btn { display: none; }
+        
+        #feedback {
+            margin-top: 1.5rem;
+            font-size: 1.1rem;
+            height: 30px;
+            font-weight: bold;
+        }
+
+        .feedback-correct { color: var(--success-color); }
+        .feedback-incorrect { color: var(--error-color); }
+        
+        .progress-bar-container {
+            width: 100%;
+            background-color: var(--primary-color);
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--accent-color);
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 20px;
+            background: linear-gradient(90deg, #9daaf2, #f4d35e);
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>Ajuste de Unidades Galáctico</h1>
+
+        <div id="info-display">
+            <span id="score">Calificación: 0 / 10</span>
+        </div>
+        
+        <div class="progress-bar-container">
+            <div id="progress-bar"></div>
+        </div>
+        
+        <h3 id="mision-nombre"></h3>
+        <div id="problema"></div>
+        
+        <div id="input-area"></div>
+        
+        <div class="controls">
+            <button id="verificar-btn">Calcular</button>
+            <button id="siguiente-btn">Siguiente Maniobra</button>
+            <button id="reiniciar-btn">Nueva Simulación</button>
+        </div>
+        <div id="feedback"></div>
+    </div>
+
+    <script>
+        const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const randFloat = (min, max) => (Math.random() * (max - min) + min);
+
+        const misiones = [
+            {
+                nombre: "Misión 1: Calibrar Sensores de Proximidad",
+                generator: () => {
+                    const valor = randFloat(1.5, 9.5).toFixed(1);
+                    const resultado = valor * 100;
+                    return {
+                        problema: `Convertir ${valor} metros a centímetros.`,
+                        inputHTML: `<div class="input-group"><input type="text" id="respuesta" placeholder="... cm"></div>`,
+                        verificar: () => parseFloat(document.getElementById('respuesta').value) === resultado
+                    };
+                }
+            },
+            {
+                nombre: "Misión 2: Sincronizar Cronómetro",
+                generator: () => {
+                    const valor = randFloat(1.5, 4.5).toFixed(1);
+                    const resultado = valor * 3600;
+                    return {
+                        problema: `Convertir ${valor} horas a segundos.`,
+                        inputHTML: `<div class="input-group"><input type="text" id="respuesta" placeholder="... s"></div>`,
+                        verificar: () => parseFloat(document.getElementById('respuesta').value) === resultado
+                    };
+                }
+            },
+            {
+                nombre: "Misión 3: Medir Masa de Combustible",
+                generator: () => {
+                    const valor = randFloat(0.5, 5.5).toFixed(1);
+                    const resultado = valor * 1000;
+                    return {
+                        problema: `Convertir ${valor} kilogramos a gramos.`,
+                        inputHTML: `<div class="input-group"><input type="text" id="respuesta" placeholder="... g"></div>`,
+                        verificar: () => parseFloat(document.getElementById('respuesta').value) === resultado
+                    };
+                }
+            },
+            {
+                nombre: "Misión 4: Ajustar Velocidad de Crucero",
+                generator: () => {
+                    const valor = [36, 72, 90, 108, 144][randInt(0, 4)];
+                    const resultado = Math.round(valor / 3.6);
+                    return {
+                        problema: `Convertir ${valor} km/h a m/s.`,
+                        inputHTML: `<div class="input-group"><input type="text" id="respuesta" placeholder="... m/s"></div>`,
+                        verificar: () => parseFloat(document.getElementById('respuesta').value) === resultado
+                    };
+                }
+            },
+             {
+                nombre: "Misión 5: Maniobra de Aproximación",
+                generator: () => {
+                    const velocidad_kmh = 90;
+                    const tiempo_min = 30;
+                    const resultado_vel = 25; // 90 km/h en m/s
+                    const resultado_t = 0.5; // 30 min en h
+                    return {
+                        problema: `La nave viaja a ${velocidad_kmh} km/h por ${tiempo_min} minutos. Convierte la velocidad a m/s y el tiempo a horas.`,
+                        inputHTML: `<div class="input-group">
+                            <span>Velocidad: <input type="text" id="resp-vel" placeholder="... m/s"></span>
+                            <span>Tiempo: <input type="text" id="resp-t" placeholder="... h"></span>
+                        </div>`,
+                        verificar: () => {
+                           const velUser = parseFloat(document.getElementById('resp-vel').value);
+                           const tUser = parseFloat(document.getElementById('resp-t').value);
+                           return velUser === resultado_vel && tUser === resultado_t;
+                        }
+                    };
+                }
+            }
+        ];
+
+        let misionActual = 0;
+        let misionData = {};
+        let puntuacion = 0;
+        
+        const misionNombreDisplay = document.getElementById('mision-nombre');
+        const problemaDiv = document.getElementById('problema');
+        const inputArea = document.getElementById('input-area');
+        const feedbackDiv = document.getElementById('feedback');
+        const verificarBtn = document.getElementById('verificar-btn');
+        const siguienteBtn = document.getElementById('siguiente-btn');
+        const reiniciarBtn = document.getElementById('reiniciar-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const scoreDisplay = document.getElementById('score');
+
+        function updateInfoDisplay() {
+            scoreDisplay.textContent = `Calificación: ${puntuacion} / 10`;
+        }
+
+        function updateProgressBar() {
+            const progress = (misionActual / misiones.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function cargarMision(index) {
+            const mision = misiones[index];
+            misionData = mision.generator();
+            
+            misionNombreDisplay.textContent = mision.nombre;
+            problemaDiv.innerHTML = misionData.problema;
+            inputArea.innerHTML = misionData.inputHTML;
+            
+            feedbackDiv.textContent = 'Ingresa el resultado de la conversión.';
+            feedbackDiv.className = '';
+            
+            verificarBtn.style.display = 'inline-block';
+            siguienteBtn.style.display = 'none';
+            reiniciarBtn.style.display = 'none';
+
+            updateProgressBar();
+            updateInfoDisplay();
+        }
+        
+        function verificarRespuesta() {
+            const esCorrecto = misionData.verificar();
+            
+            if (esCorrecto) {
+                puntuacion += 2;
+                feedbackDiv.textContent = '¡Cálculo correcto! Sistema estabilizado.';
+                feedbackDiv.className = 'feedback-correct';
+            } else {
+                feedbackDiv.textContent = '¡Error en la conversión! Peligro de navegación.';
+                feedbackDiv.className = 'feedback-incorrect';
+            }
+            
+            verificarBtn.style.display = 'none';
+            inputArea.querySelectorAll('input').forEach(el => el.disabled = true);
+             
+            if (misionActual < misiones.length - 1) {
+                siguienteBtn.style.display = 'inline-block';
+            } else {
+                setTimeout(() => {
+                    misionNombreDisplay.textContent = "¡Todas las maniobras completadas!";
+                    problemaDiv.innerHTML = `Calificación Final: ${puntuacion} / 10. ¡Navegación exitosa!`;
+                    inputArea.innerHTML = '';
+                    reiniciarBtn.style.display = 'inline-block';
+                    misionActual++;
+                    updateProgressBar();
+                }, 1500);
+            }
+            updateInfoDisplay();
+        }
+        
+        verificarBtn.addEventListener('click', verificarRespuesta);
+
+        inputArea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                verificarBtn.click();
+            }
+        });
+
+        siguienteBtn.addEventListener('click', () => {
+            misionActual++;
+            if (misionActual < misiones.length) {
+                cargarMision(misionActual);
+            }
+        });
+
+        reiniciarBtn.addEventListener('click', () => {
+            misionActual = 0;
+            puntuacion = 0;
+            cargarMision(misionActual);
+        });
+
+        window.onload = () => {
+            cargarMision(misionActual);
+        };
+    </script>
+</body>
+</html>
